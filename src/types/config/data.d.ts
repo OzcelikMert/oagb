@@ -1,9 +1,8 @@
 export interface ConfigDataDocument {
     api: string
-    auth: string
-    ignoreUserAccounts: number[]
+    userAccounts: number[]
     interval: number
-    refreshToken: string
     maxProfit: number
     lowestPriceDiff: 60
+    forbiddenHours: string[]
 }

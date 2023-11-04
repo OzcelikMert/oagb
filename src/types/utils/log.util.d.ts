@@ -1,7 +1,7 @@
 import {UserAccountDocument} from "../services/userAccount.service";
 import {GroupDocument} from "../services/groups.service";
 
-export interface LogAddParamDataDocument {
+export interface LogDocument {
     isAuth: boolean
     time: string
     userAccount: UserAccountDocument

@@ -1,13 +1,14 @@
 import axios from "axios";
 import {ConfigDataDocument} from "../types/config/data";
 import {GroupDocument} from "../types/services/groups.service";
+import {ConfigAuthDocument} from "../types/config/auth";
 
 export default {
-    async get(data: ConfigDataDocument) : Promise<GroupDocument[]> {
+    async get(data: ConfigDataDocument, auth: ConfigAuthDocument) : Promise<GroupDocument[]> {
         const url = `${data.api}/app/product/groups`;
 
         const headers = {
-            Authorization: data.auth,
+            Authorization: auth.accessToken,
             'Content-Type': 'application/json'
         };
 

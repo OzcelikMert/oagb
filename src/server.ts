@@ -6,93 +6,121 @@ import "./library/variable/string"
 import "./library/variable/number"
 import "./library/variable/date"
 import "./library/variable/math"
-import fs from "fs";
-import * as path from "path";
-import {ConfigDataDocument} from "./types/config/data";
 import userAccountService from "./services/userAccount.service";
 import groupService from "./services/group.service";
 import authService from "./services/auth.service";
-import threadUtil from "./utils/thread.util";
 import productService from "./services/product.service";
-import {LogAddParamDataDocument} from "./types/utils/log.util";
+import {LogDocument} from "./types/utils/log.util";
 import logUtil from "./utils/log.util";
+import dateUtil from "./utils/date.util";
+import routers from "./routers";
+import fileUtil from "./utils/file.util";
+import {ConfigDataDocument} from "./types/config/data";
+import {ConfigAuthDocument} from "./types/config/auth";
 
 console.time(`server`)
 console.log(chalk.cyan(`\n=========  SERVER LOADING =========`));
 
 const server = fastify({ trustProxy: true, logger: true, ignoreTrailingSlash: true });
 
-const configDataPath = path.resolve(__dirname, "../", "config", "data.json");
-const outputPath = path.resolve(__dirname, "../", "output");
-
 async function startGrouping() {
-    let configData = await new Promise<ConfigDataDocument>(resolve => {
-        fs.readFile(configDataPath, "utf8", function (err, result) {
-            resolve(JSON.parse(result))
-        });
-    });
+    const localDate = dateUtil.getLocalString();
 
-    let userAccounts = await userAccountService.get(configData);
-    console.log(userAccounts);
-    if(userAccounts != false){
-        for (const userAccount of userAccounts) {
-            let logData: LogAddParamDataDocument = {
-                isAuth: false,
-                time: (new Date()).toUTCString(),
-                userAccount: userAccount,
-                grouping: [],
-                cleaningLowestPriceDiff: {
-                    lowestPriceDiff: configData.lowestPriceDiff,
-                    productCount: 0
-                },
-                cleaningProfit: {
-                    maxProfit: configData.maxProfit,
-                    productCount: 0
-                }
-            };
-            await userAccountService.put(configData, {userAccountId: userAccount.id});
-            let refresh = await authService.postRefresh(configData, {refreshToken: configData.refreshToken});
-            if(refresh != false){
-                logData.isAuth = true;
-                configData.auth = refresh.accessToken;
-                configData.refreshToken = refresh.refreshToken;
-                let groups = await groupService.get(configData);
-                console.log(groups);
-                let products = await productService.get(configData, {isLowestPrice: false});
-                console.log(products.length);
-                for(const group of groups) {
-                    logData.grouping.push({group: group, productCount: products.length})
-                    await productService.addGroup(configData, {productIds: products.map(product => product.id), groupId: group.id});
-                    await productService.update(configData, {productIds: products.map(product => product.id)});
-                    products = await productService.get(configData, {isLowestPrice: false});
-                    console.log(products.length);
-                }
-                await productService.activate(configData, {productIds: products.map(product => product.id)});
-                products = await productService.get(configData, {profitType: "amount", maxProfit: configData.maxProfit});
-                logData.cleaningProfit.productCount = products.length;
-                await productService.delete(configData, {productIds: products.map(product => product.id), filter: {profitType: "amount", maxProfit: configData.maxProfit}});
-                products = await productService.get(configData, {lowestPriceDiffCondition: "above", lowestPriceDiff: configData.lowestPriceDiff});
-                logData.cleaningLowestPriceDiff.productCount = products.length;
-                await productService.delete(configData, {productIds: products.map(product => product.id), filter: {lowestPriceDiffCondition: "above", lowestPriceDiff: configData.lowestPriceDiff}});
-            }
-            logUtil.add(outputPath, logData);
-        }
-        setTimeout(() => {
-            startGrouping();
-        }, (configData.interval * 60 * 1000))
+    if(!(await refreshSession())) {
+        console.log(chalk.red(`------------ ${localDate} - Session couldn't refresh ------------`));
     }
 
-    await new Promise(resolve => {
-        fs.writeFile(configDataPath, JSON.stringify(configData), function (err) {
-            resolve(0)
-        })
-    })
+    let configData = await fileUtil.getConfigData();
+    let configAuth = await fileUtil.getAuthData();
+
+    if (dateUtil.checkForbiddenHours(configData)) {
+        console.log(chalk.red(`------------ ${localDate} - Forbidden Hours ------------`));
+    } else {
+        console.log(chalk.cyan(`------------ ${localDate} - Group Start ------------`));
+        console.time(`group`)
+        let userAccounts = await userAccountService.get(configData, configAuth);
+        if(userAccounts != false){
+            console.log(chalk.green(`Auth is successful`));
+            for (const userAccount of userAccounts) {
+                let logData: LogDocument = {
+                    isAuth: false,
+                    time: dateUtil.getLocalString(),
+                    userAccount: userAccount,
+                    grouping: [],
+                    cleaningLowestPriceDiff: {
+                        lowestPriceDiff: configData.lowestPriceDiff,
+                        productCount: 0
+                    },
+                    cleaningProfit: {
+                        maxProfit: configData.maxProfit,
+                        productCount: 0
+                    }
+                };
+                await userAccountService.put(configData, configAuth, {userAccountId: userAccount.id});
+                let refresh = await authService.postRefresh(configData, configAuth, {refreshToken: configAuth.refreshToken});
+                if(refresh != false){
+                    logData.isAuth = true;
+                    configAuth.accessToken = refresh.accessToken;
+                    configAuth.refreshToken = refresh.refreshToken;
+                    let groups = await groupService.get(configData, configAuth);
+                    let products = await productService.get(configData, configAuth, {isLowestPrice: false});
+                    for(const group of groups) {
+                        logData.grouping.push({group: group, productCount: products.length ?? 0})
+                     //   await productService.addGroup(configData, configAuth, {productIds: products.map(product => product.id), groupId: group.id});
+                     //   await productService.update(configData, configAuth, {productIds: products.map(product => product.id)});
+                        products = await productService.get(configData, configAuth, {isLowestPrice: false});
+                    }
+                   // await productService.activate(configData, configAuth, {productIds: products.map(product => product.id)});
+                    products = await productService.get(configData, configAuth, {profitType: "amount", maxProfit: configData.maxProfit});
+                    logData.cleaningProfit.productCount = products.length ?? 0;
+                   // await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {profitType: "amount", maxProfit: configData.maxProfit}});
+                    products = await productService.get(configData, configAuth, {lowestPriceDiffCondition: "above", lowestPriceDiff: configData.lowestPriceDiff});
+                    logData.cleaningLowestPriceDiff.productCount = products.length ?? 0;
+                   // await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {lowestPriceDiffCondition: "above", lowestPriceDiff: configData.lowestPriceDiff}});
+                }
+                await logUtil.add(logData);
+            }
+            await fileUtil.setAuthData(configAuth);
+        }else {
+            console.log(chalk.red(`Auth has error`));
+        }
+        console.timeEnd(`group`);
+        console.log(chalk.cyan(`------------ ${localDate} - Group End ------------`));
+    }
+
+    setTimeout(() => {
+        startGrouping();
+    }, (configData.interval * 60 * 1000));
 }
 
+async function refreshSession() {
+   // if(grouping) return;
+
+    let configData = await fileUtil.getConfigData();
+    let configAuth = await fileUtil.getAuthData();
+
+    let refresh = await authService.postRefresh(configData, configAuth, {refreshToken: configAuth.refreshToken});
+    if(refresh != false) {
+        configAuth.accessToken = refresh.accessToken;
+        configAuth.refreshToken = refresh.refreshToken;
+
+        await fileUtil.setAuthData(configAuth);
+        return true;
+    }
+    return false;
+}
+
+server.register(routers);
+
 server.listen({port: 5001}, async () => {
-    await startGrouping();
     console.log(chalk.cyan(`=========  SERVER STARTED =========\n`));
     console.timeEnd(`server`);
+
+    let configData = await fileUtil.getConfigData();
+    setTimeout(async () => {
+        await startGrouping();
+    }, (configData.interval * 60 * 1000));
+
 });
 
 
