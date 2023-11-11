@@ -16,6 +16,10 @@ export default {
         const endTime = new Date(localDate);
         endTime.setHours(Number(endForbiddenHour[0]), Number(endForbiddenHour[1]), 0, 0);
 
+        if (endForbiddenHour[0] < startForbiddenHour[0]) {
+            endTime.setDate(endTime.getDate() + 1);
+        }
+
         return currentTime >= startTime && currentTime <= endTime;
     }
 }

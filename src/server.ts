@@ -22,6 +22,11 @@ console.log(chalk.cyan(`\n=========  SERVER LOADING =========`));
 
 const server = fastify({trustProxy: true, logger: true, ignoreTrailingSlash: true});
 
+/*
+    247204,
+    247205
+*/
+
 async function startGrouping() {
     const localDate = dateUtil.getLocalString();
 
@@ -92,7 +97,7 @@ async function startGrouping() {
                     logData.cleaningProfit.productCount = products.length ?? 0;
                     logData.removedAsins.push(...products.map(product => product.asin));
                     if(logData.cleaningProfit.productCount > 0){
-                       // await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {profitType: "amount", maxProfit: configData.maxProfit}});
+                       await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {profitType: "amount", maxProfit: configData.maxProfit}});
                     }
                     products = await productService.get(configData, configAuth, {
                         profitType: "percentage",
@@ -101,7 +106,7 @@ async function startGrouping() {
                     logData.cleaningProfitPercentage.productCount = products.length ?? 0;
                     logData.removedAsins.push(...products.map(product => product.asin));
                     if(logData.cleaningProfitPercentage.productCount > 0){
-                        //await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {profitType: "percentage", maxProfit: configData.percentageProfit}});
+                        await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {profitType: "percentage", maxProfit: configData.percentageProfit}});
                     }
                     products = await productService.get(configData, configAuth, {
                         lowestPriceDiffCondition: "above",
@@ -110,7 +115,7 @@ async function startGrouping() {
                     logData.cleaningLowestPriceDiff.productCount = products.length ?? 0;
                     logData.removedAsins.push(...products.map(product => product.asin));
                     if(logData.cleaningLowestPriceDiff.productCount > 0){
-                       // await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {lowestPriceDiffCondition: "above", lowestPriceDiff: configData.lowestPriceDiff}});
+                       await productService.delete(configData, configAuth, {productIds: products.map(product => product.id), filter: {lowestPriceDiffCondition: "above", lowestPriceDiff: configData.lowestPriceDiff}});
                     }
                 }
                 await logUtil.add(logData);
@@ -151,7 +156,7 @@ server.listen({port: 5001}, async () => {
 
     let configData = await fileUtil.getConfigData();
 
-    await startGrouping();
+    //await startGrouping();
     setTimeout(async () => {
         await startGrouping();
     }, (configData.interval * 60 * 1000));

@@ -1,12 +1,11 @@
 {
   "api": "https://api.oneamz.com",
   "userAccounts": [
-    247204,
-    247205
+    305372
   ],
   "forbiddenHours": [
-    "13:59",
-    "02:59"
+    "20:00",
+    "03:00"
   ],
   "interval": 120,
   "maxProfit": 4,
