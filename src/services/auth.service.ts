@@ -13,7 +13,7 @@ export default {
         };
 
         try {
-            const response = await axios.post(url, params, { headers });
+            const response = await axios.post(url, params, {headers: headers});
             return response.data;
         } catch (error: any) {
             console.log(error);

@@ -1,8 +1,8 @@
 import axios from "axios";
 import {ConfigDataDocument} from "../types/config/data";
 import {
-    ProductActivateParamDocument,
-    ProductAddParamDocument, ProductDeleteParamDocument,
+    ProductActivateParamDocument, ProductAddGroupParamDocument,
+    ProductDeleteParamDocument,
     ProductDocument,
     ProductGetParamDocument,
     ProductUpdateParamDocument
@@ -20,28 +20,23 @@ export default {
         };
 
         try {
-            const response = await axios.get(url, { headers, params: {...params, start: 0, length: 999999, orderColumn: 1, orderDirection: "desc", timezone: "+03:00", draw: 1}});
+            const response = await axios.get(url, { headers: headers, params: {...params, start: 0, length: 999999, orderColumn: 1, orderDirection: "desc", timezone: "+03:00", draw: 1}});
             return response.data.data;
         } catch (error: any) {
             console.error('Hata:', error?.message);
             return [];
         }
     },
-    async addGroup(data: ConfigDataDocument, auth: ConfigAuthDocument, params: ProductAddParamDocument) : Promise<boolean> {
+    async addGroup(data: ConfigDataDocument, auth: ConfigAuthDocument, params: ProductAddGroupParamDocument) : Promise<boolean> {
         const url = `${data.api}/app/product/addToGroup`;
 
         const headers = {
             Authorization: auth.accessToken,
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
         };
 
-        const formData = new FormData();
-        params.productIds.forEach((productId, index) => {
-            formData.append(`productIds[${index}]`, productId);
-        });
-
         try {
-            const response = await axios.post(url, { headers, params: {productIds: "", filter: {"isLowestPrice":false}, replaceGroupIfExist: true, groupId: params.groupId}});
+            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter, replaceGroupIfExist: true, groupId: params.groupId}});
             return true;
         } catch (error: any) {
             console.error('Hata:', error?.message);
@@ -53,16 +48,11 @@ export default {
 
         const headers = {
             Authorization: auth.accessToken,
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
         };
 
-        const formData = new FormData();
-        params.productIds.forEach((productId, index) => {
-            formData.append(`productIds[${index}]`, productId);
-        });
-
         try {
-            const response = await axios.post(url, { headers, params: {productIds: "", filter: {"isLowestPrice":false}}});
+            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter}});
             return true;
         } catch (error: any) {
             console.error('Hata:', error?.message);
@@ -74,16 +64,11 @@ export default {
 
         const headers = {
             Authorization: auth.accessToken,
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
         };
 
-        const formData = new FormData();
-        params.productIds.forEach((productId, index) => {
-            formData.append(`productIds[${index}]`, productId);
-        });
-
         try {
-            const response = await axios.put(url, { headers, params: {productIds: "", filter: {"isLowestPrice":false}}});
+            const response = await axios.put(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter}});
             return true;
         } catch (error: any) {
             console.error('Hata:', error?.message);
@@ -95,16 +80,11 @@ export default {
 
         const headers = {
             Authorization: auth.accessToken,
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
         };
 
-        const formData = new FormData();
-        params.productIds.forEach((productId, index) => {
-            formData.append(`productIds[${index}]`, productId);
-        });
-
         try {
-            const response = await axios.put(url, { headers, params: {productIds: "", filter: params.filter}});
+            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter}});
             return true;
         } catch (error: any) {
             console.error('Hata:', error?.message);

@@ -5,10 +5,12 @@
     247205
   ],
   "forbiddenHours": [
-    "19:59",
-    "23:59"
+    "13:59",
+    "02:59"
   ],
   "interval": 120,
   "maxProfit": 4,
+  "maxProfitTotalProfitPercent": 40,
+  "percentageProfit": 7,
   "lowestPriceDiff": 60
 }

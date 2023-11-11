@@ -15,6 +15,9 @@ export default {
                         color: blue;
                         text-decoration: none;
                     }
+                    .text-center {
+                        text-align: center !important;
+                    }
                     ${params.style}
                 </style>
               </head>

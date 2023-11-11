@@ -13,7 +13,7 @@ export default {
         };
 
         try {
-            const response = await axios.get(url, { headers });
+            const response = await axios.get(url, {headers: headers});
             return response.data.groups;
         } catch (error: any) {
             console.error('Hata:', error?.message);

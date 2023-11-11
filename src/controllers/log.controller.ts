@@ -80,7 +80,7 @@ export default {
                 }
                 
                 .head {
-                   display: flex;
+                    display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
@@ -112,6 +112,10 @@ export default {
                     margin: 2px 0;
                     flex-direction: column;
                 }
+                
+                .field .asin-link {
+                    justify-content: right;
+                }
             `,
             body: `
                 <div class="head">
@@ -135,19 +139,59 @@ export default {
                                     </div>
                                 `).join("")}
                             </div>
+                            <div><strong>Actived Product Count:</strong> ${log.activatedProductCount}</div>
                             <div><strong>Filter (Max Profit)</strong></div>
                             <div class="sub-field">
-                                <div><strong>Max Profit:</strong> ${log.cleaningProfit.maxProfit}</div>
-                                <div><strong>ProductCount:</strong> ${log.cleaningProfit.productCount}</div>
+                                <div><strong>Max Profit:</strong> ${log.cleaningProfit.maxProfit}$</div>
+                                <div><strong>Product Count:</strong> ${log.cleaningProfit.productCount}</div>
+                            </div>
+                            <div><strong>Filter (Max Profit Percentage)</strong></div>
+                            <div class="sub-field">
+                                <div><strong>Max Profit Percentage:</strong> ${log.cleaningProfitPercentage.maxProfitPercentage}%</div>
+                                <div><strong>Product Count:</strong> ${log.cleaningProfitPercentage.productCount}</div>
                             </div>
                             <div><strong>Filter (Lowest Price Diff)</strong></div>
                             <div class="sub-field">
-                                <div><strong>Lowest Price Diff:</strong> ${log.cleaningLowestPriceDiff.lowestPriceDiff}</div>
-                                <div><strong>ProductCount:</strong> ${log.cleaningLowestPriceDiff.productCount}</div>
+                                <div><strong>Lowest Price Diff:</strong> ${log.cleaningLowestPriceDiff.lowestPriceDiff}%</div>
+                                <div><strong>Product Count:</strong> ${log.cleaningLowestPriceDiff.productCount}</div>
+                            </div>
+                            <div class="asin-link">
+                                <h3><a href="asin/${fileName}/${log._id}">Removed Asin List</a> (${log.removedAsins.length})</h3>
                             </div>
                         </div>
                     `).join("")}
                 </div>
+            `
+        }));
+    },
+    async getAsinList(
+        req: FastifyRequest,
+        reply: FastifyReply
+    ) {
+        const params = req.params as { fileName: string, logId: string };
+        const fileName = params.fileName ?? "";
+        let filePathWithName = path.resolve(pathUtil.output, `${fileName}.json`);
+        let logs = await new Promise<LogDocument[]>(resolve => {
+            fs.readFile(filePathWithName, "utf8", (err: any, result: string) => {
+                resolve(JSON.parse(result ?? "[]"))
+            });
+        });
+
+        let log = logs.filter(log => log._id == params.logId)[0];
+
+        reply.header('Content-Type', 'text/html').code(200).send(htmlUtil.getPage({
+            titleTag: `${fileName} Asin List - ${log.userAccount.countryCode}`,
+            style: `
+                h3 {
+                    margin-bottom: 0;
+                }
+            `,
+            body: `
+                <div>
+                    <h3 class="text-center"><a href="/${fileName}">Return Back</a></h3>
+                    <h1 class="text-center">${fileName} Asin List (${log.userAccount.countryCode})</h1>
+                </div>
+                ${log.removedAsins.map(removedAsin => `<p>${removedAsin}</p>`).join("")}
             `
         }));
     }

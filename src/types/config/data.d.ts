@@ -3,6 +3,8 @@ export interface ConfigDataDocument {
     userAccounts: number[]
     interval: number
     maxProfit: number
-    lowestPriceDiff: 60
+    lowestPriceDiff: number
     forbiddenHours: string[]
+    maxProfitTotalProfitPercent: number
+    percentageProfit: number
 }

@@ -1,6 +1,8 @@
 export interface ProductDocument {
     id: number
     asin: string
+    totalProfit: number
+    totalPriceInSource: number
 }
 
 export interface ProductGetParamDocument {
@@ -11,17 +13,20 @@ export interface ProductGetParamDocument {
     lowestPriceDiffCondition?: string
 }
 
-export interface ProductAddParamDocument {
+export interface ProductAddGroupParamDocument {
     groupId: number
     productIds: number[]
+    filter: ProductGetParamDocument
 }
 
 export interface ProductUpdateParamDocument {
     productIds: number[]
+    filter: ProductGetParamDocument
 }
 
 export interface ProductActivateParamDocument {
     productIds: number[]
+    filter: ProductGetParamDocument
 }
 
 export interface ProductDeleteParamDocument {
