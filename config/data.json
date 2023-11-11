@@ -1,7 +1,10 @@
 {
   "api": "https://api.oneamz.com",
   "userAccounts": [
-    305372
+    305372,
+    305370,
+    247204,
+    247205
   ],
   "forbiddenHours": [
     "20:00",
