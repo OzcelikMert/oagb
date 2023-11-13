@@ -7,7 +7,6 @@ import {
     ProductGetParamDocument,
     ProductUpdateParamDocument
 } from "../types/services/product.service";
-import FormData from "form-data";
 import {ConfigAuthDocument} from "../types/config/auth";
 
 export default {
@@ -23,7 +22,7 @@ export default {
             const response = await axios.get(url, { headers: headers, params: {...params, start: 0, length: 999999, orderColumn: 1, orderDirection: "desc", timezone: "+03:00", draw: 1}});
             return response.data.data;
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('product get Hata:', error?.message);
             return [];
         }
     },
@@ -36,10 +35,10 @@ export default {
         };
 
         try {
-            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter, replaceGroupIfExist: true, groupId: params.groupId}});
+            const response = await axios.post(url, {}, {headers: headers, params: {productIds: "", filter: JSON.stringify(params.filter), replaceGroupIfExist: true, groupId: params.groupId}});
             return true;
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('product addGroup Hata:', error?.message);
             return false;
         }
     },
@@ -52,10 +51,10 @@ export default {
         };
 
         try {
-            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter}});
+            const response = await axios.post(url, {}, {headers: headers, params: {productIds: "", filter: JSON.stringify(params.filter)}});
             return true;
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('product update Hata:', error?.message);
             return false;
         }
     },
@@ -68,10 +67,10 @@ export default {
         };
 
         try {
-            const response = await axios.put(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter}});
+            const response = await axios.put(url, {}, {headers: headers, params: {productIds: "", filter: JSON.stringify(params.filter)}});
             return true;
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('product activate Hata:', error?.message);
             return false;
         }
     },
@@ -84,10 +83,10 @@ export default {
         };
 
         try {
-            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), ...params.filter}});
+            const response = await axios.post(url, {}, {headers: headers, params: {productIds: params.productIds.map(productId => productId).join(","), filter: JSON.stringify(params.filter)}});
             return true;
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('product delete Hata:', error?.message);
             return false;
         }
     }

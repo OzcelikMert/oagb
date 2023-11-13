@@ -17,7 +17,7 @@ export default {
             return response.data;
         } catch (error: any) {
             console.log(error);
-            console.error('Hata:', error?.message);
+            console.error('auth postRefresh Hata:', error?.message);
             return false;
         }
     }

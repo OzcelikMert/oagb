@@ -17,7 +17,7 @@ export default {
             const response = await axios.get(url, {headers: headers});
             return response.data.userAccounts.filter((userAccount: UserAccountDocument) => data.userAccounts.some(configUserAccount => configUserAccount == userAccount.id));
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('userAccount get Hata:', error?.message);
             return false;
         }
     },
@@ -36,7 +36,7 @@ export default {
             const response = await axios.put(url, formData, {headers: headers});
             return true;
         } catch (error: any) {
-            console.error('Hata:', error?.message);
+            console.error('userAccount put Hata:', error?.message);
             return false;
         }
     }

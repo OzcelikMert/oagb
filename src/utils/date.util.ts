@@ -1,10 +1,11 @@
 import {ConfigDataDocument} from "../types/config/data";
-import chalk from "chalk";
 
 export default {
     getLocalString() {
-        const options = { timeZone: 'Europe/Istanbul' };
-        return new Date().toLocaleString('tr-TR', options);
+        const options = {
+            timeZone: 'Europe/Istanbul'
+        };
+        return new Date().toLocaleString('en-US', options);
     },
     checkForbiddenHours(data: ConfigDataDocument) {
         const localDate = this.getLocalString();
