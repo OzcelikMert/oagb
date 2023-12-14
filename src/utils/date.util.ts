@@ -8,19 +8,20 @@ export default {
     },
     checkForbiddenHours(data: ConfigDataDocument) {
         const localDate = this.getLocalString();
+
         const currentTime = new Date(localDate);
+        const currentHours = currentTime.getHours();
+        const currentMinutes = currentTime.getMinutes();
 
         let startForbiddenHour = data.forbiddenHours[0].split(":");
+        const startHours = Number(startForbiddenHour[0]);
+        const startMinutes = Number(startForbiddenHour[1]);
+
         let endForbiddenHour = data.forbiddenHours[1].split(":");
+        const endHours = Number(endForbiddenHour[0]);
+        const endMinutes = Number(endForbiddenHour[1]);
 
-        const startTime =  new Date(new Date(localDate).setUTCHours(Number(startForbiddenHour[0]), Number(startForbiddenHour[1]), 0, 0));
-
-        const endTime = new Date(new Date(localDate).setUTCHours(Number(endForbiddenHour[0]), Number(endForbiddenHour[1]), 0, 0));
-
-        if (endTime < startTime) {
-            endTime.addDays(1);
-        }
-
-        return currentTime >= startTime && currentTime <= endTime;
+        return (currentHours > startHours || (currentHours == startHours && currentMinutes >= startMinutes)) ||
+            (currentHours < endHours || (currentHours == endHours && currentMinutes < endMinutes));
     }
 }

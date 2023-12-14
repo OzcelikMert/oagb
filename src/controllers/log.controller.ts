@@ -1,10 +1,11 @@
-import {FastifyRequest, FastifyReply} from 'fastify';
+import {FastifyReply, FastifyRequest} from 'fastify';
 import pathUtil from "../utils/path.util";
 import htmlUtil from "../utils/html.util";
 import {LogDocument} from "../types/utils/log.util";
 import path from "path";
 import fileUtil from "../utils/file.util";
 import dateUtil from "../utils/date.util";
+import {DateMask} from "../library/variable";
 
 const fs = require('fs');
 
@@ -31,6 +32,8 @@ export default {
             return date1Fixed.localeCompare(date2Fixed);
         }).reverse();
 
+        let date = new Date(dateUtil.getLocalString());
+
         reply.header('Content-Type', 'text/html').code(200).send(htmlUtil.getPage({
             titleTag: "All Logs",
             style: `
@@ -38,9 +41,13 @@ export default {
                     color: red;
                     text-align: center;
                 }
+                h3.date {
+                    text-align: center;
+                }
             `,
             body: `
                 <div>
+                    <h3 class="date">${date.toLocaleString()}</h3>
                     ${dateUtil.checkForbiddenHours(configData) ? `<h3 class="forbidden-hours">Forbidden Hours ${configData.forbiddenHours[0]} - ${configData.forbiddenHours[1]}</h3>` : ``}
                     <h1>List of Log Files</h1>
                     <h4>(Year - Day - Month)</h4>
