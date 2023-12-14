@@ -6,13 +6,21 @@
     247204,
     247205
   ],
+  "groupNames": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+  ],
   "forbiddenHours": [
     "20:00",
     "03:00"
   ],
   "interval": 120,
-  "maxProfit": 4,
+  "maxProfit": 6,
   "maxProfitTotalProfitPercent": 40,
-  "percentageProfit": 7,
-  "lowestPriceDiff": 60
+  "percentageProfit": 13.5,
+  "lowestPriceDiff": 60,
+  "startWithGrouping": false
 }

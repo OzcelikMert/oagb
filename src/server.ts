@@ -73,8 +73,11 @@ async function startGrouping() {
                     let groups = await groupService.get(configData, configAuth);
                     let products = await productService.get(configData, configAuth, {isLowestPrice: false});
                     for (const group of groups) {
+                        if(
+                            configData.groupNames.length > 0 &&
+                            !configData.groupNames.some(groupName => groupName.toString().trim().toLowerCase() == group.name.toString().trim().toLowerCase())
+                        ) { continue; }
                         let productCount = products.length ?? 0;
-                        logData.grouping.push({group: group, productCount: productCount})
                         if (productCount > 0) {
                             await productService.addGroup(configData, configAuth, {
                                 productIds: products.map(product => product.id),
@@ -85,13 +88,14 @@ async function startGrouping() {
                                 productIds: products.map(product => product.id),
                                 filter: {isLowestPrice: false}
                             });
+                            logData.grouping.push({group: group, productCount: productCount})
                             console.log(`- ${chalk.green(`Grouped and updated ${productCount} products to ${group.name}`)}`);
                         }
                         products = await productService.get(configData, configAuth, {isLowestPrice: false});
                     }
                     logData.activatedProductCount = products.length ?? 0;
                     if (logData.activatedProductCount > 0) {
-                        await productService.activate(configData, configAuth, {
+                       await productService.activate(configData, configAuth, {
                             productIds: products.map(product => product.id),
                             filter: {isLowestPrice: false}
                         });
@@ -167,7 +171,9 @@ server.listen({port: 5001}, async () => {
 
     let configData = await fileUtil.getConfigData();
 
-    await startGrouping();
+    if(configData.startWithGrouping == true){
+        await startGrouping();
+    }
     setTimeout(async () => {
         await startGrouping();
     }, (configData.interval * 60 * 1000));
