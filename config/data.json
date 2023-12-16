@@ -15,7 +15,7 @@
   ],
   "forbiddenHours": [
     "20:00",
-    "03:00"
+    "04:00"
   ],
   "interval": 120,
   "maxProfit": 6,

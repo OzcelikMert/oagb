@@ -5,7 +5,7 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "node ./dist/server.js --env=production",
-    "build": "tsc && node build/src/server.js",
+    "build": "tsc",
     "dev": "nodemon --config nodemon.json src/server.ts"
   },
   "author": "Mert ÖZÇELİK & Kerim EKLEME",

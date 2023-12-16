@@ -2,9 +2,9 @@ import {ConfigDataDocument} from "../types/config/data";
 
 export default {
     getLocalString() {
-        return new Date().toLocaleString('en-US', {
+        return new Date().toLocaleString("en-US", {
             hour12: false
-        });
+        }).replace(", 24:", ", 00:");
     },
     checkForbiddenHours(data: ConfigDataDocument) {
         const localDate = this.getLocalString();
